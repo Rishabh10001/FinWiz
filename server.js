@@ -221,20 +221,20 @@ dataRouter.post('/budgets', async (req, res) => {
     }
 });
 
-// dataRouter.put('/budgets/:id', async (req, res) => {
-//     try {
-//         const { limit } = req.body;
-//         const budget = await Budget.findOneAndUpdate(
-//             { _id: req.params.id, userId: req.userId },
-//             { limit: limit },
-//             { new: true, runValidators: true }
-//         );
-//         if (!budget) return res.status(404).json({ message: 'Budget not found' });
-//         res.json(budget);
-//     } catch (error) {
-//         res.status(400).json({ message: 'Error updating budget', error: error.message });
-//     }
-// });
+dataRouter.put('/budgets/:id', async (req, res) => {
+    try {
+        const { limit } = req.body;
+        const budget = await Budget.findOneAndUpdate(
+            { _id: req.params.id, userId: req.userId },
+            { limit: limit },
+            { new: true, runValidators: true }
+        );
+        if (!budget) return res.status(404).json({ message: 'Budget not found' });
+        res.json(budget);
+    } catch (error) {
+        res.status(400).json({ message: 'Error updating budget', error: error.message });
+    }
+});
 
 
 // dataRouter.delete('/budgets/:id', async (req, res) => {
