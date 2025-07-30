@@ -247,8 +247,8 @@ dataRouter.delete('/budgets/:id', async (req, res) => {
     }
 });
 
-// // Mount the data router for all /api paths
-// app.use('/api', dataRouter);
+// Mount the data router for all /api paths
+app.use('/api', dataRouter);
 
 // --- Serve Frontend ---
 // app.use(express.static(path.join(__dirname, 'public')));
