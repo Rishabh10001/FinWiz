@@ -109,32 +109,32 @@ app.post('/api/contact', async (req, res) => {
 });
 
 
-// // --- Authentication Routes ---
-// app.post('/api/auth/signup', async (req, res) => {
-//     try {
-//         const { fullName, email, password, confirmPassword } = req.body;
+// --- Authentication Routes ---
+app.post('/api/auth/signup', async (req, res) => {
+    try {
+        const { fullName, email, password, confirmPassword } = req.body;
         
-//         if (!fullName || !email || !password) {
-//             return res.status(400).json({ message: 'All fields are required.' });
-//         }
-//         if (password !== confirmPassword) {
-//             return res.status(400).json({ message: 'Passwords do not match.' });
-//         }
-//         if (password.length < 6) {
-//             return res.status(400).json({ message: 'Password must be at least 6 characters long.' });
-//         }
-//         const existingUser = await User.findOne({ email });
-//         if (existingUser) {
-//             return res.status(409).json({ message: 'Email already in use.' });
-//         }
-//         const hashedPassword = await bcrypt.hash(password, 12);
-//         const user = new User({ fullName, email, password: hashedPassword });
-//         await user.save();
-//         res.status(201).json({ message: 'User created successfully. Please log in.' });
-//     } catch (error) {
-//         res.status(500).json({ message: 'Error signing up', error: error.message });
-//     }
-// });
+        if (!fullName || !email || !password) {
+            return res.status(400).json({ message: 'All fields are required.' });
+        }
+        if (password !== confirmPassword) {
+            return res.status(400).json({ message: 'Passwords do not match.' });
+        }
+        if (password.length < 6) {
+            return res.status(400).json({ message: 'Password must be at least 6 characters long.' });
+        }
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(409).json({ message: 'Email already in use.' });
+        }
+        const hashedPassword = await bcrypt.hash(password, 12);
+        const user = new User({ fullName, email, password: hashedPassword });
+        await user.save();
+        res.status(201).json({ message: 'User created successfully. Please log in.' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error signing up', error: error.message });
+    }
+});
 
 // app.post('/api/auth/signin', async (req, res) => {
 //     try {
