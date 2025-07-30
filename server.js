@@ -18,11 +18,14 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 // app.use(helmet());
+// THIS IS THE NEW, CORRECT CODE
 app.use(
-    helmet.contentSecurityPolicy({
-        directives: {
-            ...helmet.contentSecurityPolicy.getDefaults().directives,
-            "style-src": ["'self'", "'unsafe-inline'"],
+    helmet({
+        contentSecurityPolicy: {
+            directives: {
+                "script-src": ["'self'", "https://cdn.tailwindcss.com", "https://cdnjs.cloudflare.com"],
+                "style-src": ["'self'", "'unsafe-inline'"],
+            },
         },
     })
 );
