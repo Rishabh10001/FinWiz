@@ -205,21 +205,21 @@ dataRouter.delete('/transactions/:id', async (req, res) => {
     }
 });
 
-// // --- Budget CRUD ---
-// dataRouter.post('/budgets', async (req, res) => {
-//     try {
-//         const { category, limit } = req.body;
-//         const existingBudget = await Budget.findOne({ category, userId: req.userId });
-//         if (existingBudget) {
-//             return res.status(409).json({ message: `A budget for '${category}' already exists.` });
-//         }
-//         const newBudget = new Budget({ category, limit, userId: req.userId });
-//         await newBudget.save();
-//         res.status(201).json(newBudget);
-//     } catch (error) {
-//         res.status(400).json({ message: 'Error creating budget', error: error.message });
-//     }
-// });
+// --- Budget CRUD ---
+dataRouter.post('/budgets', async (req, res) => {
+    try {
+        const { category, limit } = req.body;
+        const existingBudget = await Budget.findOne({ category, userId: req.userId });
+        if (existingBudget) {
+            return res.status(409).json({ message: `A budget for '${category}' already exists.` });
+        }
+        const newBudget = new Budget({ category, limit, userId: req.userId });
+        await newBudget.save();
+        res.status(201).json(newBudget);
+    } catch (error) {
+        res.status(400).json({ message: 'Error creating budget', error: error.message });
+    }
+});
 
 // dataRouter.put('/budgets/:id', async (req, res) => {
 //     try {
