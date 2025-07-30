@@ -237,15 +237,15 @@ dataRouter.put('/budgets/:id', async (req, res) => {
 });
 
 
-// dataRouter.delete('/budgets/:id', async (req, res) => {
-//     try {
-//         const deleted = await Budget.findOneAndDelete({ _id: req.params.id, userId: req.userId });
-//         if (!deleted) return res.status(404).json({ message: 'Budget not found' });
-//         res.status(204).send();
-//     } catch (error) {
-//         res.status(500).json({ message: 'Error deleting budget', error: error.message });
-//     }
-// });
+dataRouter.delete('/budgets/:id', async (req, res) => {
+    try {
+        const deleted = await Budget.findOneAndDelete({ _id: req.params.id, userId: req.userId });
+        if (!deleted) return res.status(404).json({ message: 'Budget not found' });
+        res.status(204).send();
+    } catch (error) {
+        res.status(500).json({ message: 'Error deleting budget', error: error.message });
+    }
+});
 
 // // Mount the data router for all /api paths
 // app.use('/api', dataRouter);
