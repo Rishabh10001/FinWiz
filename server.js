@@ -154,21 +154,21 @@ app.post('/api/auth/signin', async (req, res) => {
     }
 });
 
-// // --- Protected Data Routes ---
-// const dataRouter = express.Router();
-// dataRouter.use(authMiddleware);
+// --- Protected Data Routes ---
+const dataRouter = express.Router();
+dataRouter.use(authMiddleware);
 
-// dataRouter.get('/data', async (req, res) => {
-//     try {
-//         const [transactions, budgets] = await Promise.all([
-//             Transaction.find({ userId: req.userId }).sort({ date: -1 }),
-//             Budget.find({ userId: req.userId }).sort({ category: 1 })
-//         ]);
-//         res.json({ transactions, budgets });
-//     } catch (error) {
-//         res.status(500).json({ message: 'Error fetching data', error: error.message });
-//     }
-// });
+dataRouter.get('/data', async (req, res) => {
+    try {
+        const [transactions, budgets] = await Promise.all([
+            Transaction.find({ userId: req.userId }).sort({ date: -1 }),
+            Budget.find({ userId: req.userId }).sort({ category: 1 })
+        ]);
+        res.json({ transactions, budgets });
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching data', error: error.message });
+    }
+});
 
 // // --- Transaction CRUD ---
 // dataRouter.post('/transactions', async (req, res) => {
