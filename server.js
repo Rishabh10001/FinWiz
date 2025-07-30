@@ -260,6 +260,9 @@ dataRouter.delete('/budgets/:id', async (req, res) => {
 
 app.use('/api', dataRouter);
 
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 // 8. Start Server
 app.listen(PORT, () => {
