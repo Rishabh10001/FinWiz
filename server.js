@@ -195,15 +195,15 @@ dataRouter.put('/transactions/:id', async (req, res) => {
     }
 });
 
-// dataRouter.delete('/transactions/:id', async (req, res) => {
-//     try {
-//         const deleted = await Transaction.findOneAndDelete({ _id: req.params.id, userId: req.userId });
-//         if (!deleted) return res.status(404).json({ message: 'Transaction not found' });
-//         res.status(204).send();
-//     } catch (error) {
-//         res.status(500).json({ message: 'Error deleting transaction', error: error.message });
-//     }
-// });
+dataRouter.delete('/transactions/:id', async (req, res) => {
+    try {
+        const deleted = await Transaction.findOneAndDelete({ _id: req.params.id, userId: req.userId });
+        if (!deleted) return res.status(404).json({ message: 'Transaction not found' });
+        res.status(204).send();
+    } catch (error) {
+        res.status(500).json({ message: 'Error deleting transaction', error: error.message });
+    }
+});
 
 // // --- Budget CRUD ---
 // dataRouter.post('/budgets', async (req, res) => {
