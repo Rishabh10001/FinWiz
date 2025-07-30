@@ -1,6 +1,6 @@
-// // server.js - Corrected Version
+// server.js
 
-// // 1. Import Dependencies
+// 1. Import Dependencies
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
@@ -8,7 +8,7 @@ const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const helmet = require('helmet');
-const nodemailer = require('nodemailer'); // Import Nodemailer
+const nodemailer = require('nodemailer');
 const path = require('path');
 
 // 2. Initialize App and Middleware
@@ -37,7 +37,6 @@ const transporter = nodemailer.createTransport({
 });
 
 console.log('Nodemailer configured for user:', process.env.EMAIL_USER);
-
 
 // 5. Define Schemas and Models
 const userSchema = new mongoose.Schema({
@@ -255,21 +254,20 @@ dataRouter.delete('/budgets/:id', async (req, res) => {
     }
 });
 
-///////////////////////////////////
+// Mount the data router
 app.use('/api', dataRouter);
 
+// --- Serve Frontend ---
+// This serves static files like CSS, images, or client-side JS from the 'public' directory
 app.use(express.static(path.join(__dirname, 'public')));
+
+// For any other GET request, send the index.html file
+// This is crucial for single-page applications (SPAs)
 app.get('*', (req, res) => {
     res.sendFile(path.resolve(__dirname, 'public', 'index.html'));
 });
-////////////////////////////////////
+
 // 8. Start Server
 app.listen(PORT, () => {
     console.log(`Backend server is running on http://localhost:${PORT}`);
 });
-
-
-
-
-
-
