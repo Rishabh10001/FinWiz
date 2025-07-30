@@ -2,6 +2,7 @@
 // server.js - Corrected Version
 
 // 1. Import Dependencies
+const path = require('path');
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
@@ -18,6 +19,7 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(helmet());
 app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
 
 // 3. Connect to MongoDB
 mongoose.connect(process.env.DATABASE_URL)
