@@ -19,11 +19,19 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 // app.use(helmet());
 // THIS IS THE NEW, CORRECT CODE
+// In server.js
+
 app.use(
     helmet({
         contentSecurityPolicy: {
             directives: {
-                "script-src": ["'self'", "https://cdn.tailwindcss.com", "https://cdnjs.cloudflare.com"],
+                "script-src": [
+                    "'self'",
+                    "'unsafe-inline'", // Allows your main inline script to run
+                    "https://cdn.tailwindcss.com",
+                    "https://cdnjs.cloudflare.com",
+                    "https://cdn.jsdelivr.net" // Allows Chart.js to be loaded
+                ],
                 "style-src": ["'self'", "'unsafe-inline'"],
             },
         },
