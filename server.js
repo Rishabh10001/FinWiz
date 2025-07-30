@@ -252,7 +252,7 @@ app.use('/api', dataRouter);
 
 // --- Serve Frontend ---
 app.use(express.static(path.join(__dirname, 'public')));
-app.get('*', (req, res) => {
+app.get('*', (_req, res) => {
     res.sendFile(path.resolve(__dirname, 'public', 'index.html'));
 });
 
