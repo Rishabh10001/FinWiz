@@ -181,19 +181,19 @@ dataRouter.post('/transactions', async (req, res) => {
     }
 });
 
-// dataRouter.put('/transactions/:id', async (req, res) => {
-//     try {
-//         const updatedTransaction = await Transaction.findOneAndUpdate(
-//             { _id: req.params.id, userId: req.userId },
-//             req.body,
-//             { new: true, runValidators: true }
-//         );
-//         if (!updatedTransaction) return res.status(404).json({ message: 'Transaction not found' });
-//         res.json(updatedTransaction);
-//     } catch (error) {
-//         res.status(400).json({ message: 'Error updating transaction', error: error.message });
-//     }
-// });
+dataRouter.put('/transactions/:id', async (req, res) => {
+    try {
+        const updatedTransaction = await Transaction.findOneAndUpdate(
+            { _id: req.params.id, userId: req.userId },
+            req.body,
+            { new: true, runValidators: true }
+        );
+        if (!updatedTransaction) return res.status(404).json({ message: 'Transaction not found' });
+        res.json(updatedTransaction);
+    } catch (error) {
+        res.status(400).json({ message: 'Error updating transaction', error: error.message });
+    }
+});
 
 // dataRouter.delete('/transactions/:id', async (req, res) => {
 //     try {
