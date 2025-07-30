@@ -136,23 +136,23 @@ app.post('/api/auth/signup', async (req, res) => {
     }
 });
 
-// app.post('/api/auth/signin', async (req, res) => {
-//     try {
-//         const { email, password } = req.body;
-//         const user = await User.findOne({ email });
-//         if (!user) {
-//             return res.status(401).json({ message: 'Invalid email or password' });
-//         }
-//         const isMatch = await bcrypt.compare(password, user.password);
-//         if (!isMatch) {
-//             return res.status(401).json({ message: 'Invalid email or password' });
-//         }
-//         const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '8h' });
-//         res.status(200).json({ token, userEmail: user.email, fullName: user.fullName });
-//     } catch (error) {
-//         res.status(500).json({ message: 'Error signing in', error: error.message });
-//     }
-// });
+app.post('/api/auth/signin', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(401).json({ message: 'Invalid email or password' });
+        }
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(401).json({ message: 'Invalid email or password' });
+        }
+        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '8h' });
+        res.status(200).json({ token, userEmail: user.email, fullName: user.fullName });
+    } catch (error) {
+        res.status(500).json({ message: 'Error signing in', error: error.message });
+    }
+});
 
 // // --- Protected Data Routes ---
 // const dataRouter = express.Router();
