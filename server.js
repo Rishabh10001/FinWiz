@@ -9,6 +9,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const helmet = require('helmet');
 const nodemailer = require('nodemailer'); // Import Nodemailer
+const path = require('path');
 
 // 2. Initialize App and Middleware
 const app = express();
