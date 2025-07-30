@@ -84,29 +84,29 @@ const authMiddleware = (req, res, next) => {
 // 7. API Routes
 
 // --- Public Contact Route ---
-// app.post('/api/contact', async (req, res) => {
-//     try {
-//         const { name, email, subject, message } = req.body;
-//         if (!name || !email || !subject || !message) {
-//             return res.status(400).json({ message: 'All fields are required.' });
-//         }
+app.post('/api/contact', async (req, res) => {
+    try {
+        const { name, email, subject, message } = req.body;
+        if (!name || !email || !subject || !message) {
+            return res.status(400).json({ message: 'All fields are required.' });
+        }
 
-//         const mailOptions = {
-//             from: `"${name}" <${process.env.EMAIL_USER}>`,
-//             to: process.env.EMAIL_USER,
-//             replyTo: email,
-//             subject: `FinWiz Contact Form: ${subject}`,
-//             html: `<p>Name: ${name}</p><p>Email: ${email}</p><p>Message: ${message}</p>`
-//         };
+        const mailOptions = {
+            from: `"${name}" <${process.env.EMAIL_USER}>`,
+            to: process.env.EMAIL_USER,
+            replyTo: email,
+            subject: `FinWiz Contact Form: ${subject}`,
+            html: `<p>Name: ${name}</p><p>Email: ${email}</p><p>Message: ${message}</p>`
+        };
 
-//         await transporter.sendMail(mailOptions);
-//         res.status(200).json({ message: 'Message sent successfully!' });
+        await transporter.sendMail(mailOptions);
+        res.status(200).json({ message: 'Message sent successfully!' });
 
-//     } catch (error) {
-//         console.error('Error sending contact email:', error);
-//         res.status(500).json({ message: 'Failed to send message.' });
-//     }
-// });
+    } catch (error) {
+        console.error('Error sending contact email:', error);
+        res.status(500).json({ message: 'Failed to send message.' });
+    }
+});
 
 
 // // --- Authentication Routes ---
