@@ -468,6 +468,7 @@ dataRouter.post('/budgets', async (req, res) => {
         await newBudget.save();
         res.status(201).json(newBudget);
     } catch (error) {
+        // Handle cases where a budget for that category already exists
         if (error.code === 11000) {
              return res.status(409).json({ message: `A budget for '${category}' already exists.` });
         }
@@ -503,7 +504,8 @@ dataRouter.delete('/budgets/:id', async (req, res) => {
 app.use('/api', dataRouter);
 
 // --- 7a. Serve Frontend ---
-app.use(express.static(path.join(__dirname, 'public')));
+// This must be after all API routes
+app.use(express.static(path.join(__dirname)));
 app.get('*', (req, res) => {
     res.sendFile(path.resolve(__dirname, 'index.html'));
 });
