@@ -1,4 +1,5 @@
-// server.js
+
+// server.js - Corrected Version
 
 // 1. Import Dependencies
 require('dotenv').config();
@@ -8,8 +9,7 @@ const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const helmet = require('helmet');
-const nodemailer = require('nodemailer');
-const path = require('path');
+const nodemailer = require('nodemailer'); // Import Nodemailer
 
 // 2. Initialize App and Middleware
 const app = express();
@@ -95,8 +95,16 @@ app.post('/api/contact', async (req, res) => {
             from: `"${name}" <${process.env.EMAIL_USER}>`,
             to: process.env.EMAIL_USER,
             replyTo: email,
-            subject: `FinWiz Contact Form: ${subject}`,
-            html: `<p>Name: ${name}</p><p>Email: ${email}</p><p>Message: ${message}</p>`
+            subject: `FinViz Contact Form: ${subject}`,
+            html: `
+                <h2>New Message from FinViz Contact Form</h2>
+                <p><strong>Name:</strong> ${name}</p>
+                <p><strong>Email:</strong> ${email}</p>
+                <p><strong>Subject:</strong> ${subject}</p>
+                <hr>
+                <p><strong>Message:</strong></p>
+                <p>${message.replace(/\n/g, '<br>')}</p>
+            `
         };
 
         await transporter.sendMail(mailOptions);
@@ -247,14 +255,9 @@ dataRouter.delete('/budgets/:id', async (req, res) => {
     }
 });
 
-// Mount the data router for all /api paths
+
 app.use('/api', dataRouter);
 
-// --- Serve Frontend ---
-app.use(express.static(path.join(__dirname, 'public')));
-app.get('*', (_req, res) => {
-    res.sendFile(path.resolve(__dirname, 'public', 'index.html'));
-});
 
 // 8. Start Server
 app.listen(PORT, () => {
