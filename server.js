@@ -501,7 +501,7 @@ dataRouter.delete('/budgets/:id', async (req, res) => {
     }
 });
 
-app.use('/api', dataRouter);
+// app.use('/api', dataRouter);
 
 // --- 7a. Serve Frontend ---
 // This must be after all API routes
