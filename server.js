@@ -170,16 +170,16 @@ dataRouter.get('/data', async (req, res) => {
     }
 });
 
-// // --- Transaction CRUD ---
-// dataRouter.post('/transactions', async (req, res) => {
-//     try {
-//         const newTransaction = new Transaction({ ...req.body, userId: req.userId });
-//         await newTransaction.save();
-//         res.status(201).json(newTransaction);
-//     } catch (error) {
-//         res.status(400).json({ message: 'Error creating transaction', error: error.message });
-//     }
-// });
+// --- Transaction CRUD ---
+dataRouter.post('/transactions', async (req, res) => {
+    try {
+        const newTransaction = new Transaction({ ...req.body, userId: req.userId });
+        await newTransaction.save();
+        res.status(201).json(newTransaction);
+    } catch (error) {
+        res.status(400).json({ message: 'Error creating transaction', error: error.message });
+    }
+});
 
 // dataRouter.put('/transactions/:id', async (req, res) => {
 //     try {
