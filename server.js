@@ -17,7 +17,15 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
-app.use(helmet());
+// app.use(helmet());
+app.use(
+    helmet.contentSecurityPolicy({
+        directives: {
+            ...helmet.contentSecurityPolicy.getDefaults().directives,
+            "style-src": ["'self'", "'unsafe-inline'"],
+        },
+    })
+);
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
