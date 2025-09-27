@@ -206,6 +206,12 @@ app.post('/api/auth/signin', async (req, res) => {
     }
 });
 
+
+
+// --- Protected Data Routes ---
+const dataRouter = express.Router();
+dataRouter.use(authMiddleware);
+
 dataRouter.post('/plaid/create_link_token', async (req, res) => {
     try {
         const response = await plaidClient.linkTokenCreate({
@@ -296,10 +302,6 @@ dataRouter.post('/plaid/sync_transactions', async (req, res) => {
         res.status(500).json({ message: 'Error syncing transactions' });
     }
 });
-
-// --- Protected Data Routes ---
-const dataRouter = express.Router();
-dataRouter.use(authMiddleware);
 
 dataRouter.get('/data', async (req, res) => {
     try {
