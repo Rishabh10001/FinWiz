@@ -71,6 +71,7 @@ app.use(
                     "https://cdnjs.cloudflare.com",
                     "https://cdn.jsdelivr.net"
                 ],
+                "frame-src": ["'self'", "https://cdn.plaid.com"],
                 "style-src": ["'self'", "'unsafe-inline'"],
             },
         },
