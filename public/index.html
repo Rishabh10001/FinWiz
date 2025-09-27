@@ -9,6 +9,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
     <style type="text/tailwindcss">
         :root {
             --primary-50: #eff6ff; --primary-100: #dbeafe; --primary-200: #bfdbfe;
@@ -117,7 +119,7 @@
             <main class="flex-1 bg-[var(--background-color)] px-4 sm:px-6 lg:px-10 py-8">
                <div class="max-w-7xl mx-auto">
                     <div id="dashboard-content" class="app-content space-y-8">
-                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        <!-- <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                             <div><h1 class="text-3xl font-bold text-gray-900">Dashboard</h1><p id="dashboard-date" class="text-base text-gray-500 mt-1"></p></div>
                              <div class="flex flex-col sm:flex-row gap-2">
                                 <button class="add-budget-btn w-full sm:w-auto bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors flex items-center justify-center gap-2">
@@ -126,6 +128,24 @@
                                 </button>
                                 <button class="add-transaction-btn w-full sm:w-auto bg-[var(--primary-600)] text-white font-semibold py-2 px-4 rounded-lg hover:bg-[var(--primary-700)] transition-colors flex items-center justify-center gap-2">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" /></svg>
+                                    <span>Add Transaction</span>
+                                </button>
+                            </div>
+                        </div> -->
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                            <div>
+                                <h1 class="text-3xl font-bold text-gray-900">Dashboard</h1>
+                                <p id="dashboard-date" class="text-base text-gray-500 mt-1"></p>
+                            </div>
+                            <div class="flex flex-col sm:flex-row gap-2">
+                                <button id="link-bank-btn" class="w-full sm:w-auto bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z"></path></svg>
+                                    <span>Link Bank Account</span>
+                                </button>
+                                <button class="add-budget-btn w-full sm:w-auto bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors flex items-center justify-center gap-2">
+                                    <span>Set Budget</span>
+                                </button>
+                                <button class="add-transaction-btn w-full sm:w-auto bg-[var(--primary-600)] text-white font-semibold py-2 px-4 rounded-lg hover:bg-[var(--primary-700)] transition-colors flex items-center justify-center gap-2">
                                     <span>Add Transaction</span>
                                 </button>
                             </div>
@@ -788,8 +808,61 @@ const handleBudgetFormSubmit = async (e) => { e.preventDefault(); const form = e
 const handleDeleteTransaction = async (id) => { const confirmed = await showConfirmModal('Delete Transaction', 'Are you sure you want to delete this transaction? This action cannot be undone.'); if (!confirmed) return; const result = await apiRequest(`transactions/${id}`, 'DELETE'); if (result !== undefined && !result.error) { transactionsData = transactionsData.filter(t => t._id !== id); updateDashboard(); if (document.getElementById('transactions-content').classList.contains('active')) renderTransactionsPage(); if (document.getElementById('budgets-content').classList.contains('active')) renderBudgetsPage(); if (document.getElementById('reports-content').classList.contains('active')) renderReportsPage(); } else if(result && result.error) { alert(`Error: ${result.error}`); } };
 const handleDeleteBudget = async (id) => { const confirmed = await showConfirmModal('Delete Budget', 'Are you sure you want to delete this budget?'); if (!confirmed) return; const result = await apiRequest(`budgets/${id}`, 'DELETE'); if (result !== undefined && !result.error) { budgetsData = budgetsData.filter(b => b._id !== id); updateDashboard(); renderBudgetsPage(); } else if(result && result.error) { alert(`Error: ${result.error}`); } };
 
+const handlePlaidLink = async () => {
+    const data = await apiRequest('plaid/create_link_token', 'POST');
+    if (data && data.link_token) {
+        const handler = Plaid.create({
+            token: data.link_token,
+            onSuccess: async (public_token, metadata) => {
+                const exchangeResponse = await apiRequest('plaid/exchange_public_token', 'POST', {
+                    public_token: public_token,
+                    institution: metadata.institution,
+                });
+
+                if (exchangeResponse && !exchangeResponse.error) {
+                    alert('Bank account linked successfully! Syncing transactions...');
+                    // Automatically sync after linking
+                    await handleTransactionSync();
+                } else {
+                    alert(`Error: ${exchangeResponse.error}`);
+                }
+            },
+            onLoad: () => {},
+            onExit: (err, metadata) => {
+                if (err != null) { console.error('Plaid Link exit error:', err); }
+            },
+            onEvent: (eventName, metadata) => {}
+        });
+        handler.open();
+    }
+};
+
+const handleTransactionSync = async () => {
+    const result = await apiRequest('plaid/sync_transactions', 'POST');
+    if (result && !result.error) {
+        if (result.newTransactions && result.newTransactions.length > 0) {
+            // Add new transactions to the top of our global list
+            transactionsData.unshift(...result.newTransactions);
+            transactionsData.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            // Refresh all relevant parts of the UI
+            updateDashboard();
+            if (document.getElementById('transactions-content').classList.contains('active')) renderTransactionsPage();
+            if (document.getElementById('budgets-content').classList.contains('active')) renderBudgetsPage();
+            if (document.getElementById('reports-content').classList.contains('active')) renderReportsPage();
+            
+            alert(`${result.newTransactions.length} new transaction(s) synced successfully!`);
+        } else {
+            alert('No new transactions to sync.');
+        }
+    } else {
+        alert(`Error syncing transactions: ${result.error}`);
+    }
+};
+
 // --- EVENT LISTENERS ---
 document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('link-bank-btn').addEventListener('click', handlePlaidLink);
     document.getElementById('signin-form').addEventListener('submit', handleSignIn);
     document.getElementById('signup-form').addEventListener('submit', handleSignUp);
     document.getElementById('show-signup').addEventListener('click', (e) => { e.preventDefault(); showAuthView('signup'); });

@@ -11,6 +11,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const helmet = require('helmet');
 const nodemailer = require('nodemailer'); // Import Nodemailer
+const { Configuration, PlaidApi, PlaidEnvironments } = require('plaid');
+
 
 // 2. Initialize App and Middleware
 const app = express();
@@ -20,6 +22,18 @@ app.use(cors());
 // app.use(helmet());
 // THIS IS THE NEW, CORRECT CODE
 // In server.js
+
+// --- INITIALIZE PLAID CLIENT (add this after app initialization) ---
+const plaidConfig = new Configuration({
+    basePath: PlaidEnvironments[process.env.PLAID_ENV],
+    baseOptions: {
+        headers: {
+            'PLAID-CLIENT-ID': process.env.PLAID_CLIENT_ID,
+            'PLAID-SECRET': process.env.PLAID_SECRET,
+        },
+    },
+});
+const plaidClient = new PlaidApi(plaidConfig);
 
 app.use(
     helmet({
@@ -68,6 +82,14 @@ const userSchema = new mongoose.Schema({
 });
 const User = mongoose.model('User', userSchema);
 
+const plaidItemSchema = new mongoose.Schema({
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    accessToken: { type: String, required: true },
+    itemId: { type: String, required: true, unique: true },
+    institutionName: { type: String, required: true },
+});
+const PlaidItem = mongoose.model('PlaidItem', plaidItemSchema);
+
 const transactionSchema = new mongoose.Schema({
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
     description: { type: String, required: true, trim: true },
@@ -75,6 +97,7 @@ const transactionSchema = new mongoose.Schema({
     date: { type: Date, required: true },
     type: { type: String, required: true, enum: ['income', 'expense'] },
     category: { type: String, required: true, trim: true },
+    plaidTransactionId: { type: String, unique: true, sparse: true } // Add this line
 });
 const Transaction = mongoose.model('Transaction', transactionSchema);
 
@@ -183,6 +206,97 @@ app.post('/api/auth/signin', async (req, res) => {
     }
 });
 
+dataRouter.post('/plaid/create_link_token', async (req, res) => {
+    try {
+        const response = await plaidClient.linkTokenCreate({
+            user: { client_user_id: req.userId },
+            client_name: 'FinViz',
+            products: ['transactions'],
+            country_codes: ['IN', 'US'], // Add countries you want to support
+            language: 'en',
+        });
+        res.json({ link_token: response.data.link_token });
+    } catch (error) {
+        console.error("Error creating link token:", error.response.data);
+        res.status(500).json({ message: 'Error creating link token' });
+    }
+});
+
+// B. Exchange public_token for access_token
+dataRouter.post('/plaid/exchange_public_token', async (req, res) => {
+    try {
+        const { public_token, institution } = req.body;
+        const response = await plaidClient.itemPublicTokenExchange({ public_token });
+
+        const newItem = new PlaidItem({
+            userId: req.userId,
+            accessToken: response.data.access_token,
+            itemId: response.data.item_id,
+            institutionName: institution.name,
+        });
+        await newItem.save();
+        res.status(201).json({ message: 'Bank account linked successfully!' });
+    } catch (error) {
+        console.error("Error exchanging token:", error.response.data);
+        res.status(500).json({ message: 'Could not link bank account.' });
+    }
+});
+
+// C. Sync Transactions for a linked account
+dataRouter.post('/plaid/sync_transactions', async (req, res) => {
+    try {
+        const items = await PlaidItem.find({ userId: req.userId });
+        let allNewTransactions = [];
+
+        for (const item of items) {
+            let hasMore = true;
+            let cursor = item.cursor || null; // You should store the cursor to be more efficient
+
+            while (hasMore) {
+                const response = await plaidClient.transactionsSync({
+                    access_token: item.accessToken,
+                    cursor: cursor,
+                });
+
+                const transactions = response.data.added;
+                if (transactions.length > 0) {
+                    const existingTxIds = new Set(
+                        (await Transaction.find({ plaidTransactionId: { $in: transactions.map(t => t.transaction_id) } }))
+                        .map(t => t.plaidTransactionId)
+                    );
+
+                    const newTransactions = transactions
+                        .filter(tx => !tx.pending && !existingTxIds.has(tx.transaction_id))
+                        .map(tx => ({
+                            userId: req.userId,
+                            description: tx.name,
+                            amount: tx.amount, // Plaid amounts are positive for debits (expenses)
+                            date: tx.date,
+                            // Invert amount for credits (income)
+                            type: tx.amount > 0 ? 'expense' : 'income',
+                            category: tx.category ? tx.category[0] : 'Other', // Use Plaid's category
+                            plaidTransactionId: tx.transaction_id,
+                            amount: Math.abs(tx.amount) // Store a positive amount
+                        }));
+                    
+                    if (newTransactions.length > 0) {
+                         const saved = await Transaction.insertMany(newTransactions);
+                         allNewTransactions.push(...saved);
+                    }
+                }
+                hasMore = response.data.has_more;
+                cursor = response.data.next_cursor;
+                // Here you would save the new cursor to your PlaidItem model
+                // await PlaidItem.updateOne({ _id: item._id }, { cursor: cursor });
+            }
+        }
+        res.status(200).json({ newTransactions: allNewTransactions });
+    } catch (error) {
+        console.error('Error syncing transactions:', error.response ? error.response.data : error);
+        res.status(500).json({ message: 'Error syncing transactions' });
+    }
+});
+
 // --- Protected Data Routes ---
 const dataRouter = express.Router();
 dataRouter.use(authMiddleware);
@@ -278,6 +392,7 @@ dataRouter.delete('/budgets/:id', async (req, res) => {
 
 
 app.use('/api', dataRouter);
+
 
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
