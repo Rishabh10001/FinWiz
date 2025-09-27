@@ -35,16 +35,41 @@ const plaidConfig = new Configuration({
 });
 const plaidClient = new PlaidApi(plaidConfig);
 
+// app.use(
+//     helmet({
+//         contentSecurityPolicy: {
+//             directives: {
+//                 "script-src": [
+//                     "'self'",
+//                     "'unsafe-inline'", // Allows your main inline script to run
+//                     "https://cdn.tailwindcss.com",
+//                     "https://cdnjs.cloudflare.com",
+//                     "https://cdn.jsdelivr.net" // Allows Chart.js to be loaded
+//                 ],
+//                 "style-src": ["'self'", "'unsafe-inline'"],
+//             },
+//         },
+//     })
+// );
+// server.js
+
 app.use(
     helmet({
         contentSecurityPolicy: {
             directives: {
                 "script-src": [
                     "'self'",
-                    "'unsafe-inline'", // Allows your main inline script to run
+                    "'unsafe-inline'",
                     "https://cdn.tailwindcss.com",
                     "https://cdnjs.cloudflare.com",
-                    "https://cdn.jsdelivr.net" // Allows Chart.js to be loaded
+                    "https://cdn.jsdelivr.net",
+                    "https://cdn.plaid.com" // ✅ ADD THIS LINE FOR PLAID
+                ],
+                // Add this to fix the .map file errors
+                "connect-src": [
+                    "'self'",
+                    "https://cdnjs.cloudflare.com",
+                    "https://cdn.jsdelivr.net"
                 ],
                 "style-src": ["'self'", "'unsafe-inline'"],
             },
