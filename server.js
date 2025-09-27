@@ -218,7 +218,7 @@ dataRouter.post('/plaid/create_link_token', async (req, res) => {
             user: { client_user_id: req.userId },
             client_name: 'FinViz',
             products: ['transactions'],
-            country_codes: ['IN', 'US'], // Add countries you want to support
+            country_codes: ['CA', 'US'], // Add countries you want to support
             language: 'en',
         });
         res.json({ link_token: response.data.link_token });
